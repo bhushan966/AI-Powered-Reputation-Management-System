@@ -1,123 +1,85 @@
-# AI-Powered Online Reputation Management System
+# AI Powered Online Reputation Management System
 
-A minimal reputation dashboard for restaurants and hotels. The app aggregates review and mention data, classifies sentiment, summarizes customer feedback, and generates suggested response text.
+A full-stack prototype for monitoring online reputation of restaurants/hotels.
 
-## Tech stack
+- Search a business by name and location
+- Pull web snippets from DuckDuckGo
+- Use AI to generate structured review insights
+- View dashboard metrics (rating, total reviews, sentiment split)
+- Generate response suggestions for reviews
 
-- **Frontend:** Next.js 14 + React + TypeScript
-- **Backend:** Next.js API routes
-- **AI integration:** GROQ API (optional, fallback templates used when no API key is configured)
-- **Data sources:** Mock connectors / seeded review samples
+## Tech Stack
 
-## Architecture overview
+- Frontend: React + TypeScript + Vite (`frontend`)
+- Backend: Python + FastAPI (`backend`)
+- AI: Groq Chat Completions API
+- Web data source: `ddgs` (DuckDuckGo search snippets)
 
-1. **Business Search / Input**
-   - User enters `businessName`, `location`, and an optional `website`.
-   - The frontend posts this data to `/api/search`.
+## Project Structure
 
-2. **Review Aggregation**
-   - `app/api/search/route.ts` calls `lib/analysis.ts`.
-   - `lib/analysis.ts` uses `lib/mockData.ts` as a seeded dataset representing multiple sources:
-     - Google Reviews
-     - Zomato
-     - TripAdvisor
-     - Reddit
-     - X
-     - Instagram Mention
-   - The mocked connector is modular and can be extended with new source adapters later.
+- `backend/main.py` - FastAPI app and API routes
+- `backend/services/duckduckgo.py` - DuckDuckGo snippet fetcher
+- `backend/services/ai_engine.py` - AI processing + summary generation
+- `backend/requirements.txt` - Python dependencies
+- `frontend/src/App.tsx` - main dashboard UI
 
-3. **AI Sentiment Analysis**
-   - Reviews are classified using a lightweight rule-based analyzer in `lib/analysis.ts`.
-   - Each review receives:
-     - sentiment: Positive / Neutral / Negative
-     - topic: food, service, ambience, pricing, hygiene, etc.
-     - emotion: happy, frustrated, disappointed, impressed
-     - priority: low / medium / high
+## Prerequisites
 
-4. **Dashboard UI**
-   - The homepage renders overall metrics, sentiment split, top complaints/compliments, and recommendations.
-   - Recent reviews are shown with summary metadata.
-   - Each review includes a button to generate an AI-suggested response.
+- Python 3.10+
+- Node.js 18+
 
-5. **AI Suggested Responses**
-   - `app/api/respond/route.ts` calls `lib/ai.ts`.
-   - If `GROQ_API_KEY` is configured, the GROQ API is used to generate a polite, empathetic reply.
-   - Otherwise, the app returns a fallback template response.
+## Setup
 
-## What is mocked vs completed
-
-### Completed
-
-- Business search UI
-- Aggregated dashboard with:
-  - total review count
-  - average rating
-  - sentiment split
-  - review source breakdown
-  - top complaints and compliments
-  - recommended actions
-- Review metadata extraction
-- Suggested response generation (GROQ-enabled or fallback)
-- Clean project structure for future real connector integration
-
-### Mocked
-
-- Review ingestion is seeded from `lib/mockData.ts`.
-- No live scraping or external review platform integration.
-- The AI sentiment extraction is rule-based rather than a full NLP pipeline.
-
-## Future improvements
-
-- Add real data connectors for Google, TripAdvisor, Zomato, Instagram, X/Twitter, and blogs.
-- Replace rule-based sentiment/topic classification with an LLM or specialized sentiment API.
-- Add database storage for review history, business profiles, and user accounts.
-- Build an admin dashboard with filtering, historical trends, and response templates.
-- Add charts for trend analysis, sentiment over time, and source volume.
-- Implement a secure webhook or scheduling job to refresh review data periodically.
-
-## Setup and run
-
-1. Install dependencies:
+### 1) Backend setup
 
 ```bash
-npm install
+cd backend
+python -m venv .venv
+# Windows PowerShell
+.\\.venv\\Scripts\\Activate.ps1
+pip install -r requirements.txt
 ```
 
-2. Create `.env` from `.env.example`:
+Create `backend/.env`:
 
-```bash
-copy .env.example .env
-```
-
-2. If using GROQ, add your API key to `.env`:
-
-```text
+```env
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-4. Start the development server:
+### 2) Frontend setup
 
 ```bash
+cd frontend
+npm install
+```
+
+## Run the app
+
+Use two terminals.
+
+### Terminal 1: Start backend
+
+```bash
+cd backend
+# if using venv, activate first
+python main.py
+```
+
+Backend API will be available at:
+
+- `http://127.0.0.1:8000`
+- Swagger docs: `http://127.0.0.1:8000/docs`
+
+### Terminal 2: Start frontend
+
+```bash
+cd frontend
 npm run dev
 ```
 
-5. Open the app in your browser:
-
-```text
-http://localhost:3000
-```
-
-## File structure
-
-- `app/page.tsx` — frontend dashboard and search form
-- `app/api/search/route.ts` — aggregator endpoint
-- `app/api/respond/route.ts` — response generation endpoint
-- `lib/mockData.ts` — seeded review and mention data
-- `lib/analysis.ts` — sentiment/topic/emotion analysis and summary builder
-- `lib/ai.ts` — GROQ wrapper + fallback response generator
+Open the Vite URL shown in terminal (usually `http://localhost:5173`).
 
 ## Notes
 
-- This repository is intentionally designed to be modular.
-- The mock data and simple analytics can be replaced by real connectors and NLP services without changing the frontend.
-- The current implementation is safe and respects the requirement to avoid unsafe scraping.
+- `totalReviews`, `averageRating`, and review entries are currently AI-generated from live search snippets, so values can vary across runs.
+- This is suitable for prototype/demo workflows; you can later swap in a real provider API (Google Places/Yelp/Apify) for stable production metrics.
